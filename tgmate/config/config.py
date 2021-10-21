@@ -27,12 +27,18 @@ class Config:
         Get database connection string for SQLAlchemy like:
         'postgresql://admin:password126854578@10.72.101.12:5432/database_name'
         """
+        if self.check_env_vars():
+            return f'{self._db_driver}://{self._user}:{self._passwd}@{self._host}:{self._port}/{self._db}'
+
+    def check_env_vars(self) -> bool:
+        """
+        Check environment variables, in system.
+        :return: If al variables is exist return True, else False
+        """
         arr = (self._db_driver, self._user, self._passwd, self._host, self._db, self._port)
         check_arr = [item is not None for item in arr]
-        
-        is_ok: bool = all(check_arr)
-        if is_ok:
-            return f'{self._db_driver}://{self._user}:{self._passwd}@{self._host}:{self._port}/{self._db}'
+        return all(check_arr)
+
 
     # Setters
     def set_db_driver(self, db_driver):
