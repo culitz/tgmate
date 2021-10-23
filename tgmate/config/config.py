@@ -39,7 +39,6 @@ class Config:
         check_arr = [item is not None for item in arr]
         return all(check_arr)
 
-
     # Setters
     def set_db_driver(self, db_driver):
         self._db_driver = db_driver

@@ -2,6 +2,7 @@ import os
 import unittest
 import logging
 import datetime
+from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
@@ -23,6 +24,7 @@ from tgmate.controller import ChatController
 
 class TestModel(unittest.TestCase):
     def setUp(self) -> None:
+        load_dotenv()
         config = Config()
         config.set_host(os.getenv('TEST_DB_HOST'))
         config.set_passwd(os.getenv('TEST_DB_PASS'))
