@@ -1,6 +1,8 @@
 import os
 from typing import Optional, Callable, Dict
 from telebot.types import Message
+from telebot import TeleBot
+from tgmate.initialize import bot
 
 
 class BotReply:
@@ -19,8 +21,14 @@ class BotReply:
         """
         self._handlers: Dict[str, Callable] = handlers
         self._is_handlers_correct: Optional[bool] = None
+        self._command_list: list = list(handlers.keys())
 
     def on_message(self, message: Message) -> None:
+        """
+        On message handler
+        :param message: incoming message
+        :type message: types.Message
+        """
         text: str = message.text.lower()
         if text not in self._handlers:
             return
