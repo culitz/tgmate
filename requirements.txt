@@ -3,4 +3,6 @@ SQLAlchemy>=1.4.25
 SQLAlchemy-Utils>=0.37.8
 python-dotenv>=0.19.1
 psycopg2-binary
-pyTelegramBotAPI>-4.1.1
+pyTelegramBotAPI>=4.1.1
+Flask-Admin>=1.5.8
+Flask-Security>=3.0.0

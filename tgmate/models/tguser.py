@@ -4,8 +4,8 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Boolean
-from tgmate.models import Base
-from tgmate.config import TABLENAME_TGUSER
+from models import Base
+from config import TABLENAME_TGUSER
 
 
 class TgUser(Base):
