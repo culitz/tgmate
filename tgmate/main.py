@@ -1,14 +1,17 @@
-from telebot.types import Message
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from initialize import bot
 from initialize import log
 from initialize import app
 from threading import Thread
+from datetime import date
+from bot import CalendarReply
 
 
 @bot.message_handler(content_types=['text'])
 def on_base_commands(msg: Message):
     print('handler')
-    bot.send_message(msg.chat.id, f'handle {msg.text}')
+    markup = CalendarReply(date.today())
+    bot.send_message(msg.chat.id, f'handle {msg.text}', reply_markup=markup, parse_mode='HTML')
 
 def bot_pooling():
     while True:
