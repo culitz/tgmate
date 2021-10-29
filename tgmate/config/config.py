@@ -5,13 +5,7 @@ from typing import Optional
 from pathlib import Path
 from logging import Logger
 from dotenv import load_dotenv
-from .config_varibles import DATABASE_DRIVER
-from .config_varibles import DATABASE_HOST
-from .config_varibles import DATABASE_NAME
-from .config_varibles import DATABASE_USER
-from .config_varibles import DATABASE_PASS
-from .config_varibles import DATABASE_PORT
-from .config_varibles import TELEGRAM_TOKEN
+from .config_variable import *
 
 
 class Config:

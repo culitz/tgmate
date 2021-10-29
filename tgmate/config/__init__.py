@@ -1,15 +1,15 @@
-from .config_varibles import TABLENAME_USER
-from .config_varibles import TABLENAME_TGUSER
-from .config_varibles import TABLENAME_MESSAGE
-from .config_varibles import TABLENAME_CHAT
-from .config_varibles import CONNECTION_STR
-from .config_varibles import DATABASE_DRIVER
-from .config_varibles import DATABASE_USER
-from .config_varibles import DATABASE_PASS
-from .config_varibles import DATABASE_HOST
-from .config_varibles import DATABASE_NAME
-from .config_varibles import DATABASE_PORT
-from .config_varibles import TELEGRAM_TOKEN
+from .config_variable import TABLENAME_USER
+from .config_variable import TABLENAME_TGUSER
+from .config_variable import TABLENAME_MESSAGE
+from .config_variable import TABLENAME_CHAT
+from .config_variable import CONNECTION_STR
+from .config_variable import DATABASE_DRIVER
+from .config_variable import DATABASE_USER
+from .config_variable import DATABASE_PASS
+from .config_variable import DATABASE_HOST
+from .config_variable import DATABASE_NAME
+from .config_variable import DATABASE_PORT
+from .config_variable import TELEGRAM_TOKEN
 from .config import Config
 
 __all__ = [
