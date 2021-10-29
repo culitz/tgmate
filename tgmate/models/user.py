@@ -4,7 +4,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from .base import Base
-from tgmate.config import TABLENAME_USER
+from config import TABLENAME_USER
 
 
 class User(Base):

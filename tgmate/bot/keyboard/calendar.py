@@ -3,6 +3,9 @@ from datetime import date
 from calendar import monthrange
 from telebot.types import InlineKeyboardMarkup
 from telebot.types import InlineKeyboardButton
+from telebot import TeleBot
+
+from models.message import Message
 
 CALLBACK_TAG = 'CALENDAR'
 
@@ -53,11 +56,11 @@ class CalendarButton:
 
 
 class CalendarReply(InlineKeyboardMarkup):
-
-    def __init__(self, curr_date: Optional[date] = None) -> None:
+    def __init__(self, bot: TeleBot, curr_date: Optional[date] = None) -> None:
         super(CalendarReply, self).__init__()
         self.__date: Optional[date] = curr_date
         self.__build_calendar()
+        self.__telebot = bot
         
     def __week_days(self) -> List[InlineKeyboardButton]:
         arr = ['s', 'm', 't', 'w', 't', 'f', 's']
@@ -81,3 +84,17 @@ class CalendarReply(InlineKeyboardMarkup):
         self.row(*btn_list[14:21])
         self.row(*btn_list[21:28])
         self.row(*btn_list[28:35])
+
+    def __subscribe(self):
+        @self.__telebot.callback_query_handler(func=lambda call: True)
+        def next_callback(message: Message):
+            self.__telebot.answer_callback_query(
+                callback_query_id=message.id,
+                show_alert=False,
+                text='next'
+            )
+            self.__telebot.send_message(
+                message.chat_id,
+                'text',
+                reply_markup=CalendarReply(self.__telebot)
+            )

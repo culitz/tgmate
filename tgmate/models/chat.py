@@ -5,8 +5,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import String
 from .base import Base
-from tgmate.config import TABLENAME_CHAT
-
+from config import TABLENAME_CHAT
 
 class Chat(Base):
     __tablename__ = TABLENAME_CHAT
