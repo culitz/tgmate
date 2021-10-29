@@ -25,6 +25,7 @@ class Config:
             dotenv_file = Path().cwd() / '.env'
             load_dotenv(dotenv_file)
             self.__logger.info(f'[.env] {dotenv_file}')
+            print(dotenv_file)
 
         self.__db_driver: Optional[str] = os.getenv(DATABASE_DRIVER, None)
         self.__user: Optional[str] = os.getenv(DATABASE_USER, None)

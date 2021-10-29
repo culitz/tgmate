@@ -3,8 +3,8 @@ __author__ = 'ivan.koryshkin@gmail.com'
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
-from models import Base
-from config import TABLENAME_USER
+from .base import Base
+from tgmate.config import TABLENAME_USER
 
 
 class User(Base):

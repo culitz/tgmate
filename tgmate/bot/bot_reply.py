@@ -2,7 +2,7 @@ import os
 from typing import Optional, Callable, Dict
 from telebot.types import Message
 from telebot import TeleBot
-from initialize import bot
+from tgmate.initialize import bot
 
 
 class BotReply:

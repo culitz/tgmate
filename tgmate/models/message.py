@@ -5,8 +5,8 @@ from sqlalchemy import String
 from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
-from models import Base
-from config import TABLENAME_MESSAGE
+from .base import Base
+from tgmate.config import TABLENAME_MESSAGE
 
 
 class Message(Base):

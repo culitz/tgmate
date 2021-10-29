@@ -4,8 +4,8 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import String
-from models import Base
-from config import TABLENAME_CHAT
+from .base import Base
+from tgmate.config import TABLENAME_CHAT
 
 
 class Chat(Base):

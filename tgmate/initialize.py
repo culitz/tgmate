@@ -12,12 +12,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 # TgMate
-from config import Config
-from models import User, TgUser, Base, Message, Chat
-from views import UserModelView
-from views import TgUserView
-from views import MessageView
-from views import ChatView
+from tgmate.config import Config
+from tgmate.models import User, TgUser, Base, Message, Chat
+from tgmate.views import UserModelView
+from tgmate.views import TgUserView
+from tgmate.views import MessageView
+from tgmate.views import ChatView
 
 
 log = logging.getLogger(__name__)
