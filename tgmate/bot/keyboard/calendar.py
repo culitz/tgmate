@@ -89,7 +89,7 @@ class CalendarButton:
         """
         sp: List[str] = meta.split()
         dts: List[str] = sp[1].split('-')
-        return dts[0], dts[1], dts[2]
+        return int(dts[0]), int(dts[1]), int(dts[2])
 
 
 class CalendarReply(InlineKeyboardMarkup):
@@ -190,7 +190,7 @@ class CalendarReply(InlineKeyboardMarkup):
             month += 1
         return date(year, month, day)
 
-    def nevigate_prev(self, c: CallbackQuery) -> date:
+    def navigate_prev(self, c: CallbackQuery) -> date:
         return self.__navigate(c, -1)
 
     def navigate_next(self, c: CallbackQuery) -> date:
@@ -201,28 +201,37 @@ class CalendarReply(InlineKeyboardMarkup):
         Calendars's callbacks
         """
         @self.__telebot.callback_query_handler(func=self.__is_callback_prev)
-        def next_callback(callback_query: CallbackQuery):
+        def prev_callback(callback_query: CallbackQuery):
+            chat_id = callback_query.message.chat.id
+
             self.__telebot.answer_callback_query(
                 callback_query_id=callback_query.id, 
                 show_alert=False,
-                text='next')
+                text='pev')
 
-            d: date = CalendarButton.unpack_meta(callback_query.data)
-
+            d: date = self.navigate_prev(callback_query)
+            self.__telebot.delete_message(chat_id, callback_query.message.id)
+            
             self.__telebot.send_message(
                 callback_query.message.chat.id,
-                'prev text callback',
-                reply_markup=CalendarReply(self.__telebot))
+                d.ctime(),
+                reply_markup=CalendarReply(self.__telebot, d))
 
         @self.__telebot.callback_query_handler(func=self.__is_callback_next)
-        def prev_callback(callback_query: CallbackQuery):
+        def next_callback(callback_query: CallbackQuery):
+            chat_id = callback_query.message.chat.id
+
             self.__telebot.answer_callback_query(
                 callback_query_id=callback_query.id,
                 show_alert=False,
                 text='next'
             )
+
+            d: date = self.navigate_next(callback_query)
+            self.__telebot.delete_message(chat_id, callback_query.message.id)
+
             self.__telebot.send_message(
-                callback_query.message.chat.id,
-                'next text callback',
-                reply_markup=CalendarReply(self.__telebot)
+                chat_id,
+                d.ctime(),
+                reply_markup=CalendarReply(self.__telebot, d)
             )
