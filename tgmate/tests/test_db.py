@@ -1,10 +1,11 @@
 import os
+from typing import Dict, List, Optional, Tuple
 import unittest
-import logging
 import datetime
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
+from sqlalchemy.sql.expression import case
 from sqlalchemy_utils import database_exists, create_database, drop_database
 from sqlalchemy.orm import Query
 from sqlalchemy.engine import Engine
@@ -20,6 +21,120 @@ from tgmate.controller import UserController
 from tgmate.controller import TgUserController
 from tgmate.controller import MessageController
 from tgmate.controller import ChatController
+from tgmate.controller import BaseController
+
+
+class TestBaseModel(unittest.TestCase):
+    __TEST__ = False
+    Model = Base
+    Controller = BaseController
+    # create_args = {}
+    model_instance: Optional[Base] = None
+    _id: Optional[int] = None
+
+    def setUp(self) -> None:
+        load_dotenv()
+        config = Config()
+        config.set_host(os.getenv('TEST_DB_HOST'))
+        config.set_passwd(os.getenv('TEST_DB_PASS'))
+        config.set_port(os.getenv('TEST_DB_PORT'))
+        config.set_user(os.getenv('TEST_DB_USER'))
+        config.set_db_driver(os.getenv('TEST_DB_DRIVER'))
+        config.set_db(os.getenv('TEST_DB_NAME'))
+
+        db_url: str = config.get_db_url()
+        self.engine: Engine = create_engine(db_url)
+        self.session = Session(self.engine)
+        Base.metadata.create_all(self.engine)
+        return super().setUp()
+    
+    @staticmethod
+    def erase_table(model_type, session):
+        query: Query = session.query(model_type).all()
+        for q in query:
+            session.delete(q)
+        session.commit()
+
+    def create(self) -> Tuple[bool, str]:
+        self.erase_table(self.Model, self.session)
+        case_name = '[CREATE CASE]'
+        try:
+            self.model_instance = self.Model(**self.create_args)
+            self.session.add(self.model_instance)
+            self.session.commit()
+            self._id = self.model_instance.id
+            return True, case_name
+        except Exception as ex:
+            return False, f'{case_name} {str(ex)}'
+    
+    def read(self) -> Tuple[bool, str]:
+        case_name = '[READ CASE]'
+        try:
+            query: Query = self.session.query(self.Model).filter(self.Model.id == self._id)
+            return query.count() != 0, f"{case_name} {query.count()} {self._id}"
+        except Exception as ex:
+            return False, f"{case_name} {str(ex)}"
+
+    def delete(self):
+        try:
+            case_name = 'DELETE CASE'
+            self.session.delete(self.model_instance)
+            self.session.commit()
+            count: int = self.session.query(self.Model).filter(self.Model.id == self._id).count()
+            self.session.close()
+            return count == 0, case_name 
+        except Exception as ex:
+            return False, f"{case_name} {str(ex)}"
+    
+    def test(self):
+        if self.__TEST__:
+            res: List[Tuple[bool, str]] = []
+            res.append(self.create())
+            res.append(self.read())
+            res.append(self.delete())
+
+            for tuple in res:
+                self.assertTrue(tuple[0], msg=tuple[1])
+
+
+
+class TestUserModel(TestBaseModel, unittest.TestCase):
+    __TEST__ = True
+    Model = User
+    Controller = UserController
+    create_args = {'login':'test-login', 'password':'test_pass', 'first_name':'f_name', 'last_name':'l_name'}
+
+
+class TestTgUserModel(TestBaseModel, unittest.TestCase):
+    __TEST__ = True
+    Model = TgUser
+    Controller = TgUserController
+    create_args = {
+            'tg_id': 54321,
+            'is_bot': True,
+            'first_name': 'first_name',
+            'last_name': 'last_name',
+            'username': 'username',
+            'language_code': None,
+            'can_join_groups': None,
+            'can_read_all_group_messages': None,
+            'supports_inline_queries': None}
+
+class TestMessageModel(TestBaseModel, unittest.TestCase):
+    __TEST__ = True
+    Model = Message
+    Controller = MessageController
+    create_args = {
+            'message_id': 123123,
+            'date': datetime.datetime.now(),
+            'chat_id': 1}
+
+class TestChatModel(TestBaseModel, unittest.TestCase):
+    __TEST__ = True
+    Model = Chat
+    Controller = ChatController
+    create_args = {'tg_id': 123123}    
+
 
 
 class TestModel(unittest.TestCase):
@@ -34,118 +149,17 @@ class TestModel(unittest.TestCase):
         config.set_db(os.getenv('TEST_DB_NAME'))
 
         db_url: str = config.get_db_url()
-        self._engine: Engine = create_engine(db_url)
+        self.engine: Engine = create_engine(db_url)
 
-        Base.metadata.create_all(self._engine)
+        Base.metadata.create_all(self.engine)
         return super().setUp()
 
     @staticmethod
-    def __erase_table(model_type, session):
+    def erase_table(model_type, session):
         query: Query = session.query(model_type).all()
         for q in query:
             session.delete(q)
         session.commit()
-
-    def test_model_user(self):
-        test_login: str = 'test-login'
-        user = User(login=test_login, password='test_pass', first_name='f_name', last_name='l_name')
-        with Session(self._engine) as session:
-            self.__erase_table(User, session)
-
-            # CRATE
-            session.add(user)
-            session.commit()
-
-            # READ
-            query: Query = session.query(User).filter(User.login == test_login)
-            user0: User = query.first()
-            self.assertEqual(user.id, user0.id)
-
-            # DELETE
-            session.delete(user)
-            count: int = session.query(User).filter(User.login == test_login).count()
-            self.assertEqual(count, 0)
-            session.commit()
-            session.close()
-
-    def test_model_tg_user(self):
-        test_tg_id = 123456
-        tg_user = TgUser(
-            tg_id=test_tg_id,
-            is_bot=True,
-            first_name='first_name',
-            last_name='last_name',
-            username='username',
-            language_code=None,
-            can_join_groups=None,
-            can_read_all_group_messages=None,
-            supports_inline_queries=None
-        )
-        with Session(self._engine) as session:
-            self.__erase_table(User, session)
-
-            # CRATE
-            session.add(tg_user)
-            session.commit()
-
-            # READ
-            query: Query = session.query(TgUser).filter(TgUser.tg_id == test_tg_id)
-            tg_user0: TgUser = query.first()
-            self.assertEqual(tg_user.id, tg_user0.id)
-
-            # UPDATE
-            session.delete(tg_user)
-            count: int = session.query(TgUser).filter(TgUser.tg_id == test_tg_id).count()
-            self.assertEqual(count, 0)
-            session.commit()
-            session.close()
-
-    def test_model_message(self):
-        test_message_id = 1231232
-        msg = Message(
-            message_id=test_message_id,
-            date=datetime.datetime.now(),
-            chat_id=1
-        )
-        with Session(self._engine) as session:
-            self.__erase_table(User, session)
-
-            # CRATE
-            session.add(msg)
-            session.commit()
-
-            # READ
-            query: Query = session.query(Message).filter(Message.message_id == test_message_id)
-            msg0: Message = query.first()
-            self.assertEqual(msg.id, msg0.id)
-
-            # UPDATE
-            session.delete(msg)
-            count: int = session.query(Message).filter(Message.message_id == test_message_id).count()
-            self.assertEqual(count, 0)
-            session.commit()
-
-    def test_model_chat(self):
-        test_chat_id = 110022
-        chat = Chat(tg_id=test_chat_id)
-
-        with Session(self._engine) as session:
-            self.__erase_table(User, session)
-
-            # CRATE
-            session.add(chat)
-            session.commit()
-
-            # READ
-            query: Query = session.query(Chat).filter(Chat.tg_id == test_chat_id)
-            chat0: Chat = query.first()
-            self.assertEqual(chat.id, chat0.id)
-
-            # UPDATE
-            session.delete(chat)
-            count: int = session.query(Chat).filter(Chat.tg_id == test_chat_id).count()
-            self.assertEqual(count, 0)
-            session.commit()
 
     def test_controller_user(self):
         test_controller_login: str = 'ctl-test-user-login'
@@ -156,10 +170,10 @@ class TestModel(unittest.TestCase):
             first_name='f_name',
             last_name='l_name'
         )
-        with Session(self._engine) as session:
-            self.__erase_table(User, session)
+        with Session(self.engine) as session:
+            self.erase_table(User, session)
 
-            user_ctl = UserController(self._engine, session)
+            user_ctl = UserController(self.engine, session)
 
             # CRATE
             is_created: bool = user_ctl.create(user)
@@ -201,10 +215,10 @@ class TestModel(unittest.TestCase):
             can_read_all_group_messages=None,
             supports_inline_queries=None
         )
-        with Session(self._engine) as session:
-            self.__erase_table(TgUser, session)
+        with Session(self.engine) as session:
+            self.erase_table(TgUser, session)
 
-            tg_user_ctl = TgUserController(self._engine, session)
+            tg_user_ctl = TgUserController(self.engine, session)
 
             # CRATE
             is_created: bool = tg_user_ctl.create(tg_user)
@@ -233,6 +247,7 @@ class TestModel(unittest.TestCase):
             is_created = False if query.count() == 0 else True
             self.assertFalse(is_created, "[DELETE] Model was not deleted")
 
+class TestControllerMessage(TestModel, unittest.TestCase):
     def test_controller_message(self):
         test_message_id = 125
         chat_id = 1
@@ -241,9 +256,9 @@ class TestModel(unittest.TestCase):
             date=datetime.datetime.now(),
             chat_id=chat_id
         )
-        with Session(self._engine) as session:
-            self.__erase_table(Message, session)
-            message_ctl = MessageController(self._engine, session)
+        with Session(self.engine) as session:
+            self.erase_table(Message, session)
+            message_ctl = MessageController(self.engine, session)
 
             # CRATE
             is_created: bool = message_ctl.create(msg)
@@ -272,14 +287,16 @@ class TestModel(unittest.TestCase):
             is_created = False if query.count() == 0 else True
             self.assertFalse(is_created, "[DELETE] Model was not deleted")
 
+
+class TestControllerChat(TestModel, unittest.TestCase):
     def test_controller_chat(self):
         test_chat_id = 11256
         test_title = 'test title'
         chat = Chat(tg_id=test_chat_id, title=test_title)
-        with Session(self._engine) as session:
-            self.__erase_table(User, session)
+        with Session(self.engine) as session:
+            self.erase_table(User, session)
 
-            chat_ctl = ChatController(self._engine, session)
+            chat_ctl = ChatController(self.engine, session)
 
             # CRATE
             is_created: bool = chat_ctl.create(chat)

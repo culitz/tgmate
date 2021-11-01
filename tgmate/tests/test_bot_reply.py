@@ -2,15 +2,18 @@ import os
 import unittest
 import string
 from typing import List
-from dotenv import load_dotenv
+from dotenv.main import DotEnv
+from telebot import TeleBot
 from telebot.types import Message, User, Chat
 from tgmate.bot.bot_reply import BotReply
+from config import Config
 
 
 
 class TestBotReply(unittest.TestCase):
     def setUp(self) -> None:
-        load_dotenv()
+        self.config = Config(DotEnv=True)
+        self.bot = TeleBot(self.config.get_token())
 
     def test_command_name_whitelist(self):
         bot_reply = BotReply({})

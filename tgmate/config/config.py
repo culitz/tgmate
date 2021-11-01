@@ -13,7 +13,7 @@ class Config:
     A class for collecting environment variables and converting them to the form needed for work
     """
     def __init__(self, logger: Optional[Logger] = None, **kwargs) -> None:
-        self.__logger = logger
+        self.__logger = logger if logger is not None else Logger(__name__)
         use_dotenv: bool = kwargs.get('DotEnv', False)
         if use_dotenv:
             dotenv_file = Path().cwd() / '.env'
