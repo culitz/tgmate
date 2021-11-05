@@ -16,7 +16,7 @@ class TestBotReply(unittest.TestCase):
         self.bot = TeleBot(self.config.get_token())
 
     def test_command_name_whitelist(self):
-        bot_reply = BotReply({})
+        bot_reply = BotReply(self.bot, {})
         # Get all punctuation ASCII symbols 
         symbols: list = list(string.punctuation)
         # Removing right symbol from list
@@ -38,11 +38,11 @@ class TestBotReply(unittest.TestCase):
             pass
         
         br_list: List[BotReply] = [
-            BotReply({'/start': test_handler}),
-            BotReply({'/start': None}),
-            BotReply({'/start': 1}),
-            BotReply({'/start': 'akdhak'}),
-            BotReply({'&start': test_handler})
+            BotReply(self.bot, {'/start': test_handler}),
+            BotReply(self.bot, {'/start': None}),
+            BotReply(self.bot, {'/start': 1}),
+            BotReply(self.bot, {'/start': 'akdhak'}),
+            BotReply(self.bot, {'&start': test_handler})
         ]
 
         count_true: int = 0
@@ -68,7 +68,7 @@ class TestBotReply(unittest.TestCase):
         msg = Message(1, user, 1231231, chat, 'dsa', {}, 'ajkdshkajsh')
         msg.text = '/start'
 
-        br = BotReply({'/start': test_handler})
-        br.on_message(msg)
+        br = BotReply(self.bot, {'/start': test_handler})
+        br._on_message(msg)
         is_called: bool = msg.text == '/start0'
         self.assertTrue(is_called)
