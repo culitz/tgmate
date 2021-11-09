@@ -3,7 +3,7 @@ __author__ = 'ivan.koryshkin@gmail.com'
 from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Integer
-from sqlalchemy import Boolean
+from sqlalchemy import ForeignKey
 from sqlalchemy import DateTime
 from config import TABLENAME_MESSAGE
 from .base import Base
@@ -70,3 +70,6 @@ class Message(Base):
     caption_id = Column(Integer, nullable=True)
     # For messages with a caption, special entities like usernames, URLs, bot commands, etc. that appear in the caption
     caption_entities = Column(String, nullable=True)
+
+    # Field reference on task
+    task_id = Column(Integer, ForeignKey('task.id'), nullable=True)

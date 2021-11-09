@@ -14,20 +14,32 @@ class Config:
     """
     def __init__(self, logger: Optional[Logger] = None, **kwargs) -> None:
         self.__logger = logger if logger is not None else Logger(__name__)
+        
         use_dotenv: bool = kwargs.get('DotEnv', False)
+        is_test: bool = kwargs.get('Test', False)
+        
         if use_dotenv:
             dotenv_file = Path().cwd() / '.env'
             load_dotenv(dotenv_file)
             self.__logger.info(f'[.env] {dotenv_file}')
             print(dotenv_file)
-
-        self.__db_driver: Optional[str] = os.getenv(DATABASE_DRIVER, None)
-        self.__user: Optional[str] = os.getenv(DATABASE_USER, None)
-        self.__passwd: Optional[str] = os.getenv(DATABASE_PASS, None)
-        self.__host: Optional[str] = os.getenv(DATABASE_HOST, None)
-        self.__db: Optional[str] = os.getenv(DATABASE_NAME, None)
-        self.__port: Optional[str] = os.getenv(DATABASE_PORT, None)
-        self.__token: Optional[str] = os.getenv(TELEGRAM_TOKEN, None)
+            
+        if not is_test:
+            self.__db_driver: Optional[str] = os.getenv(DATABASE_DRIVER, None)
+            self.__user: Optional[str] = os.getenv(DATABASE_USER, None)
+            self.__passwd: Optional[str] = os.getenv(DATABASE_PASS, None)
+            self.__host: Optional[str] = os.getenv(DATABASE_HOST, None)
+            self.__db: Optional[str] = os.getenv(DATABASE_NAME, None)
+            self.__port: Optional[str] = os.getenv(DATABASE_PORT, None)
+            self.__token: Optional[str] = os.getenv(TELEGRAM_TOKEN, None)
+        else:
+            self.__db_driver: Optional[str] = os.getenv(TEST_DATABASE_DRIVER, None)
+            self.__user: Optional[str] = os.getenv(TEST_DATABASE_USER, None)
+            self.__passwd: Optional[str] = os.getenv(TEST_DATABASE_PASS, None)
+            self.__host: Optional[str] = os.getenv(TEST_DATABASE_HOST, None)
+            self.__db: Optional[str] = os.getenv(TEST_DATABASE_NAME, None)
+            self.__port: Optional[str] = os.getenv(TEST_DATABASE_PORT, None)
+            self.__token: Optional[str] = os.getenv(TELEGRAM_TOKEN, None)
 
     def get_db_url(self) -> Optional[str]:
         """
